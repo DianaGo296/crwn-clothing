@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore'
 
 // firebase config
@@ -16,10 +16,10 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig);
 
 // google sign in auth class
-const provider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();
 
 // custom google parameters (what we want to check (email account))
-provider.setCustomParameters({
+googleProvider.setCustomParameters({
 	prompt: "select_account"
 });
 
@@ -27,13 +27,15 @@ provider.setCustomParameters({
 export const auth = getAuth();
 
 // sign in with google popup -> cheking google account + our custom parameters
-export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
+export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
 
 // create DB
 export const db = getFirestore();
 
 // store user into data base
 export const createUserDocumentFromAuth = async (userAuth) => {
+	if (!userAuth) return;
+	
 	// get user reference
 	const userDocRef = doc(db, 'users', userAuth.uid);
 
@@ -60,10 +62,11 @@ export const createUserDocumentFromAuth = async (userAuth) => {
 		// if true -> return userDocRef
 		return userDocRef;
 	}
+}
 
+// create user with email and password
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+	if (!email || !password) return;
 
-
-
-
-
+	createUserWithEmailAndPassword(auth, email, password);
 }
